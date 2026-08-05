@@ -16,6 +16,40 @@ contract StakingTest is Test{
     stakess = newDeploy.run();
     }
 
+uint256 constant dummyMoney = 1000 ether;
+address DummyAdd = makeAddr("Saad");
+
+function testfund() external{
+
+    hoax(DummyAdd,dummyMoney);
+    stakess.fund{value:dummyMoney}();
+
+}
+
+function testwithdraw() external{
+
+    hoax(DummyAdd ,dummyMoney);
+    stakess.fund{value:dummyMoney}();
+
+    uint256 initialContractMoney = address(stakess).balance;
+    uint256 initialUserMoney = address(DummyAdd).balance;
+
+vm.prank(DummyAdd);
+stakess.withdraw();
+
+uint256 finalContractMoney = address(stakess).balance;
+ uint256 finalUserMoney = address(DummyAdd).balance;
+
+ assertEq(initialContractMoney + finalContractMoney  , finalUserMoney -initialUserMoney);
+
+
+
+}
+
+
+
+
+
 
 
 }
