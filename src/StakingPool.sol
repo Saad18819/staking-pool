@@ -5,12 +5,13 @@ pragma solidity ^0.8.19;
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract StakingPool{
-  uint256 constant MINIMUM_USD = 100*1e18;
+  uint256 constant MINIMUM_USD = 5*1e18;
 
 
 
   error NotEnoughAmnt();
   error NoDoublePayment();
+  error WithdrawFailed();
 
   address[] public stakers;
   mapping(address stakersAdd => uint256 stakersAmnt) public stakersAmnt;
@@ -75,6 +76,7 @@ if(NetAmntInUSD(msg.value)<MINIMUM_USD){
 if(deposited[msg.sender]){
 revert NoDoublePayment();
 }
+stakers.push(msg.sender);
 stakersAmnt[msg.sender] += msg.value;
 depositTime[msg.sender] = currentDepositTime;
 deposited[msg.sender] = true;
@@ -85,21 +87,25 @@ deposited[msg.sender] = true;
 
 function withdraw() public{
 
-if(stakersAmnt[msg.sender] == 0){
-  revert NotEnoughAmnt();
+uint256 principleAmnt = stakersAmnt[msg.sender];
+if(principleAmnt == 0){
+  revert WithdrawFailed();
 }
 
 
-uint256 netWithdraw;
-uint256 principleAmnt = stakersAmnt[msg.sender];
-uint256 bonus = (10* principleAmnt)/ 100;
+
 uint256 daysPassed = (block.timestamp - depositTime[msg.sender])/ 1 days;
-
-
 // learning : 1 days means seconds in 1 day
+
+
 stakersAmnt[msg.sender] = 0; // to avoid reecentrancy issue
 deposited[msg.sender] = false; // to avoid reecentrancy issue
+depositTime[msg.sender] = 0; // to avoid receentrancy issue
+
+
 uint256 fine;
+uint256 netWithdraw;
+uint256 bonus = (10* principleAmnt)/ 100;
 
 
 if(daysPassed < 1){
@@ -113,7 +119,7 @@ else{
   netWithdraw = principleAmnt + bonus;
 }
 
-(bool callSuccess, ) =payable(msg.sender).call{value:netWithdraw;}("");
+(bool callSuccess, ) =payable(msg.sender).call{value:netWithdraw}("");
 if(!callSuccess){
     revert NotEnoughAmnt();
 }
