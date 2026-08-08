@@ -51,46 +51,54 @@ $$\text{Net Payout} = P + B - \text{Fine}$$
 │   └── StakingTest.t.sol         # Comprehensive unit suite (vm.warp, hoax)
 ├── foundry.toml                  # Foundry configuration & remappings
 └── README.md
+```
 
+---
 
+## 🚀 Getting Started
 
+### Prerequisites
+* [Foundry](https://getfoundry.sh/) (`forge`, `cast`, `anvil`)
+* Git
 
-🚀 Getting Started
-Prerequisites
-Foundry (forge, cast, anvil)
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/YOUR_USERNAME/staking-pool-foundry.git](https://github.com/YOUR_USERNAME/staking-pool-foundry.git)
+   cd staking-pool-foundry
+   ```
 
-Git
+2. Install dependencies (Chainlink Brownie Contracts & Forge Std):
+   ```bash
+   forge install smartcontractkit/chainlink-brownie-contracts@1.3.0 --no-commit
+   forge install foundry-rs/forge-std --no-commit
+   ```
 
+3. Build the project:
+   ```bash
+   forge build
+   ```
 
-Installation
+---
 
-1.Clone the repository:
-git clone [https://github.com/YOUR_USERNAME/staking-pool-foundry.git](https://github.com/YOUR_USERNAME/staking-pool-foundry.git)
-cd staking-pool-foundry
+## 🧪 Testing Strategy
 
-2.Install dependencies (Chainlink Brownie Contracts & Forge Std):
-forge install smartcontractkit/chainlink-brownie-contracts@1.3.0 --no-commit
-forge install foundry-rs/forge-std --no-commit
+The test suite covers full deposit validation, reentrancy guards, and time-warped state verification across all vesting milestones using **Mainnet Forking**.
 
-3.Build the project:
-forge build
-
-
-
-🧪 Testing Strategy
-The test suite covers full deposit validation, reentrancy guards, and time-warped state verification across all vesting milestones using Mainnet Forking.
-
-Run Unit Tests
+### Run Unit Tests
 To test against the live Chainlink Mainnet feed:
+
+```bash
 forge test --fork-url <YOUR_MAINNET_RPC_URL> -vvv
+```
 
+### Key Test Coverage
+* `testfund()`: Verifies successful deposits above minimum USD threshold.
+* `testDayZeroWithdraw()`: Confirms exact principal return when withdrawing immediately.
+* `testDayThreeWithdraw()`: Uses `vm.warp(block.timestamp + 3 days)` to assert exact partial bonus math ($P + 0.6 B$).
+* `testDaySevenWithdraw()`: Uses `vm.warp(block.timestamp + 7 days)` to verify full 10% bonus unlocked.
 
+---
 
-Key Test Coverage:
-testfund(): Verifies successful deposits above minimum USD threshold.
-testDayZeroWithdraw(): Confirms exact principal return when withdrawing immediately.
-testDayThreeWithdraw(): Uses vm.warp(block.timestamp + 3 days) to assert exact partial bonus math ($P + 0.6 B$).
-testDaySevenWithdraw(): Uses vm.warp(block.timestamp + 7 days) to verify full 10% bonus unlocked.
-
-📄 License
-This project is licensed under the MIT License.
+## 📄 License
+This project is licensed under the **MIT License**.
